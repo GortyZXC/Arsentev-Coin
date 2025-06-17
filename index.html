@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tap Coin Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom right, #3a7bd5, #00d2ff);
+      color: white;
+      text-align: center;
+      padding: 50px;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-bottom: 20px;
+    }
+
+    #coin {
+      width: 150px;
+      height: 150px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      margin: 20px auto;
+    }
+
+    #coin img {
+      width: 100%;
+      border-radius: 50%;
+      box-shadow: 0 0 20px yellow;
+      transition: transform 0.1s ease-in-out;
+    }
+
+    #coin:active img {
+      transform: scale(0.95);
+    }
+
+    .stats, .referral {
+      margin-top: 30px;
+      font-size: 1.2em;
+    }
+
+    input[type=text] {
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      width: 80%;
+      max-width: 400px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Tap Coin</h1>
+  <button id="coin">
+    <img src="photo_2025-06-17_19-06-47.jpg" alt="Tap">
+  </button>
+
+  <div class="stats">
+    <p>Ваши коины: <span id="score">0</span></p>
+    <p>Реферальный бонус: <span id="referralBonus">0</span></p>
+  </div>
+
+  <div class="referral">
+    <p>Ваша реферальная ссылка:</p>
+    <p><input type="text" id="refLink" readonly></p>
+    <p>Введите реферальный код, если у вас есть:</p>
+    <p><input type="text" id="refInput"><button onclick="useReferral()">Применить</button></p>
+  </div>
+
+  <script>
+    let score = parseInt(localStorage.getItem('score') || '0');
+    let referralBonus = parseInt(localStorage.getItem('referralBonus') || '0');
+    let hasUsedReferral = localStorage.getItem('hasUsedReferral') === 'true';
+    const userId = generateId();
+
+    function generateId() {
+      if (localStorage.getItem('userId')) return localStorage.getItem('userId');
+      const id = Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('userId', id);
+      return id;
+    }
+
+    document.getElementById('refLink').value = `${window.location.origin}${window.location.pathname}?ref=${userId}`;
+    document.getElementById('score').textContent = score;
+    document.getElementById('referralBonus').textContent = referralBonus;
+
+    document.getElementById('coin').addEventListener('click', () => {
+      score++;
+      document.getElementById('score').textContent = score;
+      localStorage.setItem('score', score);
+    });
+
+    function useReferral() {
+      if (hasUsedReferral) {
+        alert("Вы уже использовали реферальный код!");
+        return;
+      }
+      const ref = document.getElementById('refInput').value;
+      if (ref && ref !== userId) {
+        referralBonus += 50;
+        document.getElementById('referralBonus').textContent = referralBonus;
+        localStorage.setItem('referralBonus', referralBonus);
+        localStorage.setItem('hasUsedReferral', 'true');
+        alert("Реферальный код успешно применен!");
+      } else {
+        alert("Невалидный или свой собственный код!");
+      }
+    }
+
+    window.onload = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const ref = urlParams.get('ref');
+      if (ref && ref !== userId && !hasUsedReferral) {
+        console.log(`Привлечен по ссылке: ${ref}`);
+      }
+    }
+  </script>
+</body>
+</html>
